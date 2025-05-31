@@ -10,7 +10,6 @@ import {
   export const obtenerTodosLosProductos = async (req, res) => {
     try {
       const result = await getTodosLosProductos();
-      console.log("hola")
       res.status(200).json(result);
     } catch (error) {
       res.status(500).json({ error: 'Error al obtener los productos' });
