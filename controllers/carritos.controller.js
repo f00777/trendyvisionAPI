@@ -1,4 +1,15 @@
 import * as carritoModel from "../models/carritos.model.js";
+import axios from "axios";
+import { crearFirma } from "../utils/firmaFlow.js";
+import dotenv from 'dotenv'
+import {randomUUID} from 'crypto'
+import { generarRecibo } from "./recibos.controller.js";
+
+dotenv.config()
+
+const API_KEY = process.env.FLOW_API_KEY;
+const SECRET_KEY = process.env.FLOW_SECRET_KEY;
+const URL_FRONTEND = process.env.DOMINIO
 
 // Crear carrito para un usuario (si no tiene)
 export const crearCarritoSiNoExiste = async (req, res) => {
@@ -25,9 +36,10 @@ export const agregarProductoAlCarrito = async (req, res) => {
       console.log("no hay carrito para el correo")
       carrito = await carritoModel.crearCarrito(email);
     }
+
     console.log("encontro el carrito ", carrito)
     const resultado = await carritoModel.agregarProducto(carrito.id, producto_id, cantidad);
-    res.json(resultado);
+    res.status(201).json(resultado);
   } catch (error) {
     res.status(500).json({ error: "Error al agregar producto" });
   }
@@ -87,3 +99,77 @@ export const vaciarCarrito = async (req, res) => {
     res.status(500).json({ error: "Error al vaciar el carrito" });
   }
 };
+
+
+export async function crearPago(req, res) {
+  const { email } = req.usuario;
+
+  try {
+
+    const carrito = await carritoModel.obtenerCarritoPorEmail(email);
+    
+    if (!carrito) return res.status(404).json({ error: 'Carrito no encontrado' });
+    if (carrito.pagado) return res.status(400).json({ error: 'Este carrito ya fue pagado' });
+
+    const resTotal = await carritoModel.obtenerTotal(email)
+    const total = parseInt(resTotal[0].total)
+    const commerceOrder = carrito.id + '-' + randomUUID()
+
+    const params = {
+      apiKey: API_KEY,
+      commerceOrder: commerceOrder,
+      subject: 'Pago TrendyVision',
+      currency: 'CLP',
+      amount: total,
+      email: email,
+      urlConfirmation: 'http://localhost:3001/api/carritos/confirmacion',
+      urlReturn: 'http://localhost:3001/api/carritos/confirmacion'
+    };
+
+    params.s = crearFirma(params, SECRET_KEY);
+
+    const response = await axios.post('https://sandbox.flow.cl/api/payment/create', new URLSearchParams(params), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    });
+
+    res.json(response.data);
+    
+  } catch (err) {
+    console.error('Error al crear el pago:', err.message);
+    res.status(500).json({ error: 'Error al crear el pago' });
+  }
+}
+
+
+export async function confirmarPago(req, res){
+  const {token} = req.body;
+
+  
+  try {
+    const params = {
+      apiKey: API_KEY,
+      token
+    }
+
+
+    params.s = crearFirma(params, SECRET_KEY);
+
+    const { data } = await axios.get('https://sandbox.flow.cl/api/payment/getStatus', {params})
+
+    const split = data.commerceOrder.split('-')
+    const carritoId = parseInt(split[0])
+
+    if(data.status == '2'){
+      await generarRecibo(carritoId, parseFloat(data.amount))
+
+      console.log("redirect: ", URL_FRONTEND + '/pago-exitoso' )
+
+      return res.redirect(URL_FRONTEND + '/pago-exitoso?')
+    }
+
+    res.status(402).json({error: "Orden pendiente de pago o rechazada"})
+
+  } catch (error) {
+    res.status(500).json(error)
+  }
+}

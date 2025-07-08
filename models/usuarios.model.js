@@ -1,6 +1,8 @@
 import sql from "../db/index.js";
 import bcrypt from "bcrypt";
 import { esEmailValido, esNumerico } from "../utils/functions.js";
+
+
 // Crear un nuevo usuario
 export const crearCuenta = async ({
   email,
@@ -36,7 +38,7 @@ export const crearCuenta = async ({
     const hash = await bcrypt.hash(password, 10);
 
     const resultado = await sql`
-        INSERT INTO usuarios (email, nombre, apellido, contraseña, region, comuna, direccion, codigo_postal, telefono, admin)
+        INSERT INTO usuarios (email, nombre, apellido, password, region, comuna, direccion, codigo_postal, telefono, admin)
         VALUES (${email}, ${nombre}, ${apellido}, ${hash}, ${region}, ${comuna}, ${direccion}, ${codigoPostal}, ${telefono}, ${admin})
         RETURNING *;
     `;
@@ -46,11 +48,13 @@ export const crearCuenta = async ({
 
 // Iniciar sesión de un usuario
 export const iniciarSesion = async ({email, password}) => {
+
   const resultado = await sql`
     SELECT * FROM usuarios WHERE email = ${email};
   `;
 
   const usuario = resultado[0];
+  
   if (!usuario) {
     throw new Error("Usuario no encontrado");
   }

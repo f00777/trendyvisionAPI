@@ -11,6 +11,16 @@ export const obtenerCarritoPorEmail = async (email) => {
   return carrito;
 };
 
+export const obtenerCarritoPorId = async (id) => {
+  const [carrito] = await sql`
+    SELECT * FROM carritos
+    WHERE id = ${id}
+    ORDER BY id DESC
+    LIMIT 1
+  `;
+  return carrito;
+};
+
 // Crear nuevo carrito para un usuario
 export const crearCarrito = async (email) => {
   const [nuevoCarrito] = await sql`
@@ -83,3 +93,12 @@ export const vaciarCarrito = async (carritoId) => {
   `;
 };
 
+
+export const obtenerTotal = async (email) => {
+  return await sql`
+  SELECT SUM (p.precio * cp.cantidad) as total 
+  FROM productos as p JOIN carrito_productos as cp on p.id = cp.producto_id
+  JOIN carritos as c on c.id = cp.carrito_id
+  WHERE c.usuario_email = ${email}
+  `
+}
