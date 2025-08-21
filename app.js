@@ -27,10 +27,10 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}))
 
 // Rutas
-app.use('/api/productos', productosRoutes);
-app.use('/api/usuarios', usuariosRoutes);
-app.use('/api/carritos', carritosRoutes);
-app.use('/api/recibos', recibosRoutes);
+app.use('/productos', productosRoutes);
+app.use('/usuarios', usuariosRoutes);
+app.use('/carritos', carritosRoutes);
+app.use('/recibos', recibosRoutes);
 
 // Escuchar servidor
 app.listen(PORT, () => {

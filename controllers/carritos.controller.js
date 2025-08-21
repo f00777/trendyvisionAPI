@@ -11,6 +11,18 @@ const API_KEY = process.env.FLOW_API_KEY;
 const SECRET_KEY = process.env.FLOW_SECRET_KEY;
 const URL_FRONTEND = process.env.DOMINIO
 
+const isProduction = true
+
+let flow_api_url;
+
+if(isProduction){
+  flow_api_url = "https://www.flow.cl/api"
+}
+else{
+  flow_api_url = "https://sandbox.flow.cl/api"
+}
+
+
 // Crear carrito para un usuario (si no tiene)
 export const crearCarritoSiNoExiste = async (req, res) => {
   const { email } = req.body;
@@ -41,6 +53,7 @@ export const agregarProductoAlCarrito = async (req, res) => {
     const resultado = await carritoModel.agregarProducto(carrito.id, producto_id, cantidad);
     res.status(201).json(resultado);
   } catch (error) {
+    console.log("error dentro del agregar producto al carrito: ", error)
     res.status(500).json({ error: "Error al agregar producto" });
   }
 };
@@ -107,6 +120,8 @@ export async function crearPago(req, res) {
   try {
 
     const carrito = await carritoModel.obtenerCarritoPorEmail(email);
+
+    console.log("crearPago, carrito: ", carrito)
     
     if (!carrito) return res.status(404).json({ error: 'Carrito no encontrado' });
     if (carrito.pagado) return res.status(400).json({ error: 'Este carrito ya fue pagado' });
@@ -122,13 +137,13 @@ export async function crearPago(req, res) {
       currency: 'CLP',
       amount: total,
       email: email,
-      urlConfirmation: 'http://localhost:3001/api/carritos/confirmacion',
-      urlReturn: 'http://localhost:3001/api/carritos/confirmacion'
+      urlConfirmation: `${URL_FRONTEND}/api/carritos/confirmacio`,
+      urlReturn: `${URL_FRONTEND}/pago-exitoso`
     };
 
     params.s = crearFirma(params, SECRET_KEY);
 
-    const response = await axios.post('https://sandbox.flow.cl/api/payment/create', new URLSearchParams(params), {
+    const response = await axios.post(`${flow_api_url}/payment/create`, new URLSearchParams(params), {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     });
 
@@ -154,17 +169,17 @@ export async function confirmarPago(req, res){
 
     params.s = crearFirma(params, SECRET_KEY);
 
-    const { data } = await axios.get('https://sandbox.flow.cl/api/payment/getStatus', {params})
+    const { data } = await axios.get(`${flow_api_url}/payment/getStatus`, {params})
 
     const split = data.commerceOrder.split('-')
     const carritoId = parseInt(split[0])
 
+    console.log("el carrito es: ", carritoId)
+
     if(data.status == '2'){
       await generarRecibo(carritoId, parseFloat(data.amount))
 
-      console.log("redirect: ", URL_FRONTEND + '/pago-exitoso' )
-
-      return res.redirect(URL_FRONTEND + '/pago-exitoso?')
+      res.status(200).json({mensaje: "Pago exitoso"})
     }
 
     res.status(402).json({error: "Orden pendiente de pago o rechazada"})
