@@ -137,7 +137,7 @@ export async function crearPago(req, res) {
       currency: 'CLP',
       amount: total,
       email: email,
-      urlConfirmation: `${URL_FRONTEND}/api/carritos/confirmacio`,
+      urlConfirmation: `${URL_FRONTEND}/api/carritos/confirmacion`,
       urlReturn: `${URL_FRONTEND}/pago-exitoso`
     };
 

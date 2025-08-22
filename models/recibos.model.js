@@ -9,7 +9,7 @@ export async function crearReciboProducto(recibo_id, producto_id, cantidad, prec
 }
 
 export async function obtenerRecibosEmail(email){
-    return await sql`SELECT * FROM recibos WHERE usuario_email = ${email}`
+    return await sql`SELECT * FROM recibos WHERE usuario_email = ${email} ORDER BY fecha DESC`
 }
 
 
