@@ -27,4 +27,6 @@ router.get("/crear-pago", authMiddleware, carritoController.crearPago)
 router.post("/confirmacion", carritoController.confirmarPago)
 
 
+
+
 export default router;

@@ -6,5 +6,6 @@ const router = express.Router()
 
 router.get("/", authMiddleware, recibosController.obtenerRecibos)
 router.get("/:id", authMiddleware, recibosController.obtenerRecibosId)
+router.get("/pago-exitoso/:orden/:total", recibosController.pagoExitoso)
 
 export default router

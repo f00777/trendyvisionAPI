@@ -1,5 +1,11 @@
 import * as recibosModel from "../models/recibos.model.js"
 import { obtenerTotal, obtenerCarritoPorId, obtenerProductosDelCarrito, vaciarCarrito } from "../models/carritos.model.js"
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+
+const URL_FRONTEND = process.env.DOMINIO
 
 export async function generarRecibo(id_carrito, total, numero_orden){
     try {
@@ -52,4 +58,11 @@ export async function obtenerRecibosId(req, res){
     } catch (error) {
         res.status(500).json({error: error.message})
     }
+}
+
+
+export async function pagoExitoso(req,res){
+    const {orden, total } = req.params;
+
+    res.redirect(`${URL_FRONTEND}/pago-exitoso?commerceorder=${orden}&total=${total}`)
 }
