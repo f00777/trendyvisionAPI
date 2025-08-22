@@ -71,7 +71,7 @@ export const iniciarSesion = async ({email, password}) => {
 // Obtener datos de un usuario
 export const obtenerDatosUsuario = async ({email}) =>{
   const resultado = await sql`
-    SELECT nombre, email FROM usuarios WHERE email = ${email};
+    SELECT nombre, apellido, email, region, comuna, direccion, codigo_postal, telefono FROM usuarios WHERE email = ${email};
   `;
 
   const usuario = resultado[0];
@@ -94,6 +94,23 @@ const existeUsuario = async({email}) => {
     return true;
   }
   return false;
+}
+
+
+export async function editarDatosUsuario(usuario_email , {email, nombre, apellido, direccion, codigoPostal, comuna, telefono, region }){
+  const resultado = await sql`
+    UPDATE usuarios SET nombre = ${nombre}, email = ${email}, apellido = ${apellido}, direccion = ${direccion}, codigo_postal = ${codigoPostal}, comuna = ${comuna}, telefono = ${telefono}, region = ${region} WHERE email = ${usuario_email} RETURNING *;
+  `;
+
+  console.log("en editar datos: ", resultado)
+  const usuario = resultado[0];
+
+  if (!usuario) {
+    throw new Error("Usuario no encontrado");
+  }
+  
+  return usuario
+
 }
 
 

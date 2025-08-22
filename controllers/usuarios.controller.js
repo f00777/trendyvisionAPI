@@ -1,4 +1,4 @@
-import { crearCuenta, iniciarSesion } from "../models/usuarios.model.js";
+import { crearCuenta, iniciarSesion, obtenerDatosUsuario, editarDatosUsuario } from "../models/usuarios.model.js";
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 
@@ -53,6 +53,25 @@ export const loginUsuario = async (req, res) => {
 
 export const obtenerPerfil = async (req, res) => {
   res.status(200).json({email : req.usuario.email})
+}
+
+
+export const obtenerDatos = async (req, res) => {
+  try {
+    const datos = await obtenerDatosUsuario({email: req.usuario.email})
+    res.status(200).json(datos)
+  } catch (error) {
+    res.status(500).json(error)
+  }
+}
+
+export const editarDatos = async (req, res) => {
+  try {
+    const datos = await editarDatosUsuario(req.usuario.email, req.body)
+    res.status(200).json(datos)
+  } catch (error) {
+    res.status(500).json(error)
+  }
 }
 
 export function logout(req, res) {
