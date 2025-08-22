@@ -1,7 +1,7 @@
 import sql from '../db/index.js';
 
-export async function crearRecibo(email, total){
-    return await sql`INSERT INTO recibos (usuario_email, total) VALUES (${email}, ${total}) RETURNING *`
+export async function crearRecibo(email, total, order){
+    return await sql`INSERT INTO recibos (usuario_email, total, commerce_order) VALUES (${email}, ${total}, ${order}) RETURNING *`
 } 
 
 export async function crearReciboProducto(recibo_id, producto_id, cantidad, precio_unitario){

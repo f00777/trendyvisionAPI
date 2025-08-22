@@ -177,12 +177,14 @@ export async function confirmarPago(req, res){
     console.log("el carrito es: ", carritoId)
 
     if(data.status == '2'){
-      await generarRecibo(carritoId, parseFloat(data.amount))
+      await generarRecibo(carritoId, parseFloat(data.amount), data.commerceOrder)
 
       res.status(200).json({mensaje: "Pago exitoso"})
     }
-
-    res.status(402).json({error: "Orden pendiente de pago o rechazada"})
+    else{
+      res.status(402).json({error: "Orden pendiente de pago o rechazada"})
+    }
+    
 
   } catch (error) {
     res.status(500).json(error)

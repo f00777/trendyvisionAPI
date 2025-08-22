@@ -1,12 +1,12 @@
 import * as recibosModel from "../models/recibos.model.js"
 import { obtenerTotal, obtenerCarritoPorId, obtenerProductosDelCarrito, vaciarCarrito } from "../models/carritos.model.js"
 
-export async function generarRecibo(id_carrito, total){
+export async function generarRecibo(id_carrito, total, numero_orden){
     try {
         const carrito = await obtenerCarritoPorId(id_carrito)
         const email = carrito.usuario_email
 
-        const resCrearRecibo = await recibosModel.crearRecibo(email, total)
+        const resCrearRecibo = await recibosModel.crearRecibo(email, total, numero_orden)
         const id_recibo = resCrearRecibo[0].id
 
         const productosCarrito = await obtenerProductosDelCarrito(id_carrito)
