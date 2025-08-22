@@ -138,7 +138,7 @@ export async function crearPago(req, res) {
       amount: total,
       email: email,
       urlConfirmation: `${URL_FRONTEND}/api/carritos/confirmacion`,
-      urlReturn: `${URL_FRONTEND}/pago-exitoso`
+      urlReturn: `${URL_FRONTEND}/pago-exitoso?commerceorder${commerceOrder}&total=${total}`
     };
 
     params.s = crearFirma(params, SECRET_KEY);
