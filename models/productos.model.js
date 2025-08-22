@@ -1,7 +1,7 @@
 import sql from '../db/index.js';
 
 export const getTodosLosProductos = async () => {
-  return await sql`SELECT * FROM productos`;
+  return await sql`SELECT * FROM productos WHERE activo=TRUE`;
 };
 
 export const getProductoPorId = async (id) => {
